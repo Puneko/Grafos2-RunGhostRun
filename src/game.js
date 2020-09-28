@@ -5,11 +5,11 @@ var EmptyScene = new Phaser.Class({
 	},
 
 	preload: function () {
-		console.log('Nothing.')
+		this.load.spritesheet('pacman', 'https://i.imgur.com/apbA01B.png', {frameWidth: 13, frameHeight: 13});
 	},
 
 	create: function () {
-		console.log('Nothing.')
+		var pacman = new Enemy(this, 100, 100);
 	}
 });
 
