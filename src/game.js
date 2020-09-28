@@ -9,7 +9,22 @@ var EmptyScene = new Phaser.Class({
 	},
 
 	create: function () {
-		var pacman = new Enemy(this, 100, 100);
+		var dummy_target = this.add.image(this.input.activePointer.x, this.input.activePointer.y, 'nothing');
+		this.pacman = new Enemy(this, 100, 100, dummy_target);
+
+		this.input.on('pointermove', (e) => {
+			dummy_target.x = e.position.x;
+			dummy_target.y = e.position.y;
+		});
+
+		this.input.on('pointerup', (e) => {
+			this.pacman.target.destroy();
+			this.pacman.target = null;
+		});
+	},
+
+	update: function() {
+		this.pacman.update();
 	}
 });
 
