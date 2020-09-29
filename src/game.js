@@ -5,7 +5,7 @@ var Stage_1 = new Phaser.Class({
 	},
 
 	preload: function () {
-		this.load.spritesheet('pacman', 'https://i.imgur.com/XCYBO4y.png', {frameWidth: 52, frameHeight: 52});
+		this.load.spritesheet('pacman', 'assets/pacman.png', {frameWidth: 52, frameHeight: 52, spacing: 2});
 
 		this.load.image('grid_bg', 'https://i.imgur.com/IH2Xlq7.png');
 		this.load.image('node_trigger', 'assets/circle.png');
@@ -63,7 +63,10 @@ var config = {
     	}
     },
     scene: [Stage_1],
-    pixelArt: true
+    pixelArt: true,
+    scale: {
+    	mode: Phaser.Scale.FIT
+    }
 };
 
 var game = new Phaser.Game(config);
