@@ -8,6 +8,12 @@ class Enemy {
 		this.scene = scene;
 		this.speed = 100;
 
+		scene.physics.add.collider(this.entity, this.target, () => {
+			scene.sound.add('snake').play();
+			this.target.destroy();
+			this.target = null;
+		});
+
 		scene.anims.create({
 			key: 'pac_waka',
 			frames: scene.anims.generateFrameNumbers('pacman', { start: 0, end: 2 }),
