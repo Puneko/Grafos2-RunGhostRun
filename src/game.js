@@ -1,30 +1,40 @@
-var EmptyScene = new Phaser.Class({
+var Stage_1 = new Phaser.Class({
 	Extends: Phaser.Scene,
-	initialize: function EmptyScene() {
-		Phaser.Scene.call(this, {key: 'empty_scene'});
+	initialize: function Stage_1() {
+		Phaser.Scene.call(this, {key: 'stage_1'});
 	},
 
 	preload: function () {
 		this.load.spritesheet('pacman', 'https://i.imgur.com/XCYBO4y.png', {frameWidth: 52, frameHeight: 52});
+
 		this.load.image('grid_bg', 'https://i.imgur.com/IH2Xlq7.png');
-		this.load.audio('snake', 'https://dl.dropbox.com/s/g4axwvihpfedjou/snake%3F.ogg');
 		this.load.image('node_trigger', 'assets/circle.png');
+		this.load.image('pactileset', 'https://i.imgur.com/0nTnnpf.png');
+
+		this.load.tilemapTiledJSON('stage_1', 'src/stages/stage_1.json');
+
+		this.load.audio('snake', 'https://dl.dropbox.com/s/g4axwvihpfedjou/snake%3F.ogg');
 	},
 
 	create: function () {
-		this.add.image(0, 0, 'grid_bg').setOrigin(0);
-		var dummy_target = this.physics.add.image(this.input.activePointer.x, this.input.activePointer.y, 'nothing');
-		dummy_target.setCollideWorldBounds(true);
+		this.stage = new Stage(this, 'stage_1', 'pactileset');
 
-		this.pacman = new Enemy(this, 100, 100, dummy_target);
+		var dummy_target = this.physics.add.image(this.stage.player_spawn_point.x, this.stage.player_spawn_point.y, 'nothing');
+		dummy_target.setCollideWorldBounds(true);
+		dummy_target.entity = dummy_target;
+
+		this.pacman = new Enemy(this, this.stage.pacman_spawn_point.x, this.stage.pacman_spawn_point.y, dummy_target);
+
+		this.stage.setPlayer(dummy_target);
+		this.stage.setPacman(this.pacman);
 
 		game.canvas.addEventListener('mousedown', function () {
 			game.input.mouse.requestPointerLock();
 		});
 
 		this.input.on('pointermove', (e) => {
-			dummy_target.x += e.movementX/8;
-			dummy_target.y += e.movementY/8;
+			dummy_target.setVelocityX(e.movementX * 4);
+			dummy_target.setVelocityY(e.movementY * 4);
 		});
 
 		this.input.on('pointerwheel', (e) => {
@@ -52,7 +62,7 @@ var config = {
     		debug: false
     	}
     },
-    scene: [EmptyScene],
+    scene: [Stage_1],
     pixelArt: true
 };
 
