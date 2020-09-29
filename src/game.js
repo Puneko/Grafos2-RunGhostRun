@@ -8,6 +8,7 @@ var EmptyScene = new Phaser.Class({
 		this.load.spritesheet('pacman', 'https://i.imgur.com/XCYBO4y.png', {frameWidth: 52, frameHeight: 52});
 		this.load.image('grid_bg', 'https://i.imgur.com/IH2Xlq7.png');
 		this.load.audio('snake', 'https://dl.dropbox.com/s/g4axwvihpfedjou/snake%3F.ogg');
+		this.load.image('node_trigger', 'assets/circle.png');
 	},
 
 	create: function () {
