@@ -8,15 +8,15 @@ var EmptyScene = new Phaser.Class({
 		this.load.spritesheet('pacman', 'https://i.imgur.com/XCYBO4y.png', {frameWidth: 52, frameHeight: 52});
 		this.load.image('grid_bg', 'https://i.imgur.com/IH2Xlq7.png');
 		this.load.audio('snake', 'https://dl.dropbox.com/s/g4axwvihpfedjou/snake%3F.ogg');
-		this.load.spritesheet('ghost', 'https://i.imgur.com/LQmi5bg.png', {frameWidth: 52, frameHeight: 52});
+		this.load.spritesheet('ghost', 'https://i.imgur.com/LQmi5bg.png', {frameWidth: 28, frameHeight: 28});
 	},
 
 	create: function () {
 		this.add.image(0, 0, 'grid_bg').setOrigin(0);
 		var dummy_target = this.physics.add.image(this.input.activePointer.x, this.input.activePointer.y, 'nothing');
 		dummy_target.setCollideWorldBounds(true);
-		this.ghost = new Player(this, 100, 100);
-		this.pacman = new Enemy(this, 100, 100, this.ghost);
+		this.ghost = new Player(this, 400, 400);
+		this.pacman = new Enemy(this, 100, 100, this.ghost.entity);
 		
 		game.canvas.addEventListener('mousedown', function () {
 			game.input.mouse.requestPointerLock();
@@ -33,7 +33,7 @@ var EmptyScene = new Phaser.Class({
 		});
 
 		this.cameras.main.setZoom(4);
-		this.cameras.main.startFollow(this.ghost);
+		this.cameras.main.startFollow(this.ghost.entity);
 	},
 
 	update: function() {

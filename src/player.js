@@ -9,13 +9,13 @@ class Player {
 
         scene.anims.create({
             key: 'left',
-            frames: scene.anims.generateFrameNumbers('ghost', { start: 0, end: 0 }),
+            frames: scene.anims.generateFrameNumbers('ghost', { start: 0, end: 1 }),
             frameRate: 10,
             repeat: -1
         });
         scene.anims.create({
             key: 'right',
-            frames: scene.anims.generateFrameNumbers('ghost', { start: 1, end: 1 }),
+            frames: scene.anims.generateFrameNumbers('ghost', { start: 0, end: 1 }),
             frameRate: 10,
             repeat: -1
         });
@@ -26,24 +26,23 @@ class Player {
 	update() {
         if (this.cursors.left.isDown)
         {
+            console.log(this.entity)
             this.entity.setVelocityX(-160);
         
-            scene.anims.play('left', true);
+            this.entity.anims.play('left', true);
         }
         else if (this.cursors.right.isDown)
         {
             this.entity.setVelocityX(160);
         
-            scene.anims.play('right', true);
-        }
-        else
-        {
+            this.entity.anims.play('right', true);
+        } else {
             this.entity.setVelocityX(0);
         }
         
-        if (this.cursors.up.isDown && this.entity.touching.down)
+        if (this.cursors.up.isDown && this.entity.body.touching.down)
         {
-            scene.setVelocityY(-500);
+            this.entity.setVelocityY(-200);
         }
 	}
 }
