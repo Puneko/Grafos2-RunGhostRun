@@ -10,6 +10,10 @@ class WeightedGraph {
 	getVertex(v) {
 		return this.adjList.get(v);
 	}
+
+	getSize() {
+		return this.adjList.size;
+	}
 }
 
 class UndirectedGraph extends WeightedGraph {
@@ -27,4 +31,41 @@ class DirectedGraph extends WeightedGraph {
 
 function getDistance(pointA, pointB) {
 	return Math.sqrt(Math.pow(pointA.x - pointB.x, 2) + Math.pow(pointA.y - pointB.y, 2));
+}
+
+function getBestPath(graph, start_node, last_node) {
+	let priority_queue = new Heapify(graph.getSize());
+	let distance = {};
+	let previous = {};
+
+	distances[graph.getVertex(start_node)] = 0;
+	priority_queue.push({index: start_node, node: graph.getVertex(start_node)}, 1);
+
+	graph.adjList.forEach((node, index) => {
+		if(index != start_node)
+			distance[index] = Infinity;
+		previous[index] = null;
+	});
+
+	while(priority_queue.size) {
+		let current_node = priority_queue.pop();
+
+		current_node.node.edges.forEach((edge) => {
+			let cost = edge.weight + distance[node.index];
+
+			if(cost < distance[edge.edge]) {
+				distance[edge.edge] = cost;
+				previous[edge.edge] = current_node;
+
+				priority_queue.push({index: edge.edge, node: graph.getVertex(edge.edge)}, cost);
+			}
+		});
+	}
+
+	let best_path = [last_node];
+
+	while(best_path[0] != start_node)
+		best_path.unshift(previous[best_path[0]]);
+
+	return best_path;
 }
