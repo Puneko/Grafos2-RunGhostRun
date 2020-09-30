@@ -1,34 +1,36 @@
-var EmptyScene = new Phaser.Class({
+var Stage_1 = new Phaser.Class({
 	Extends: Phaser.Scene,
-	initialize: function EmptyScene() {
-		Phaser.Scene.call(this, {key: 'empty_scene'});
+	initialize: function Stage_1() {
+		Phaser.Scene.call(this, {key: 'stage_1'});
 	},
 
 	preload: function () {
-		this.load.spritesheet('pacman', 'https://i.imgur.com/XCYBO4y.png', {frameWidth: 52, frameHeight: 52});
+		this.load.spritesheet('pacman', 'assets/pacman.png', {frameWidth: 52, frameHeight: 52, spacing: 2});
+		this.load.spritesheet('switch', 'assets/switch.png', {frameWidth: 16, frameHeight: 16, spacing: 2});
+
 		this.load.image('grid_bg', 'https://i.imgur.com/IH2Xlq7.png');
+		this.load.image('node_trigger', 'assets/circle.png');
+		this.load.image('pactileset', 'https://i.imgur.com/0nTnnpf.png');
+		this.load.image('blue_bar', 'assets/blue_bar.png');
+
+		this.load.tilemapTiledJSON('stage_1', 'src/stages/stage_1.json');
+
 		this.load.audio('snake', 'https://dl.dropbox.com/s/g4axwvihpfedjou/snake%3F.ogg');
 		this.load.spritesheet('ghost', 'https://i.imgur.com/LQmi5bg.png', {frameWidth: 28, frameHeight: 28});
 	},
 
 	create: function () {
-		this.add.image(0, 0, 'grid_bg').setOrigin(0);
-		var dummy_target = this.physics.add.image(this.input.activePointer.x, this.input.activePointer.y, 'nothing');
-		dummy_target.setCollideWorldBounds(true);
-		this.ghost = new Player(this, 100, 100);
-		this.pacman = new Enemy(this, 400, 400, this.ghost);
+		this.stage = new Stage(this, 'stage_1', 'pactileset');
+
+		this.ghost = new Player(this, this.stage.player_spawn_point.x, this.stage.player_spawn_point.y);
+		this.pacman = new Enemy(this, this.stage.pacman_spawn_point.x, this.stage.pacman_spawn_point.y, this.ghost);
+
+		this.stage.setPlayer(this.ghost);
+		this.stage.setPacman(this.pacman);
+		this.stage.generateEvents();
+
 		game.canvas.addEventListener('mousedown', function () {
 			game.input.mouse.requestPointerLock();
-		});
-
-		this.input.on('pointermove', (e) => {
-			dummy_target.x += e.movementX/8;
-			dummy_target.y += e.movementY/8;
-		});
-
-		this.input.on('pointerwheel', (e) => {
-			this.pacman.target.destroy();
-			this.pacman.target = null;
 		});
 
 		this.cameras.main.setZoom(4);
@@ -52,8 +54,11 @@ var config = {
     		debug: false
     	}
     },
-    scene: [EmptyScene],
-    pixelArt: true
+    scene: [Stage_1],
+    pixelArt: true,
+    scale: {
+    	mode: Phaser.Scale.FIT
+    }
 };
 
 var game = new Phaser.Game(config);
