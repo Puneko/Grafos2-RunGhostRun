@@ -34,6 +34,10 @@ class Stage {
 		});
 	}
 
+	updatePacmanNodes() {
+		return;
+	}
+
 	setPlayer(player) {
 		this.scene.physics.add.collider(player.entity, this.wall_layer);
 
@@ -42,9 +46,51 @@ class Stage {
 				trigger.setTint(0xff0000);
 			});
 		});
+
+		this.player = player;
 	}
 
 	setPacman(pacman) {
 		this.scene.physics.add.collider(pacman.entity, this.wall_layer);
+
+		this.pacman = pacman;
+	}
+
+	generateEvents() {
+		this.stage_info.events.forEach((event) => {
+			let event_trigger = this.scene.add.sprite(event.x, event.y, 'switch', 0).setOrigin(0);
+			this.scene.physics.add.staticGroup(event_trigger);
+
+			this.scene.physics.add.overlap(event_trigger, this.player.entity, () => {
+				if(!event.once) {
+					event_trigger.setFrame(1);
+					event.once = true;
+
+					event.affects.forEach((effect) => {
+						switch(effect.type) {
+							case 'door':
+								let door = this.scene.physics.add.image(effect.x, effect.y, 'blue_bar').setOrigin(0).setScale(1, effect.height/16).setImmovable();
+								door.body.setAllowGravity(false);
+
+								this.scene.physics.add.collider(door, this.player);
+								this.scene.physics.add.collider(door, this.pacman.entity);
+
+								this.scene.tweens.add({
+									targets: door,
+									duration: 500,
+									ease: 'Sine.easeIn',
+									y: effect.transition.y
+								});
+
+								break;
+
+							case 'graph':
+								this.updatePacmanNodes();
+								break;
+						}
+					});
+				}
+			});
+		});
 	}
 }

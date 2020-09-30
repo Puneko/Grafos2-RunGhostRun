@@ -6,10 +6,12 @@ var Stage_1 = new Phaser.Class({
 
 	preload: function () {
 		this.load.spritesheet('pacman', 'assets/pacman.png', {frameWidth: 52, frameHeight: 52, spacing: 2});
+		this.load.spritesheet('switch', 'assets/switch.png', {frameWidth: 16, frameHeight: 16, spacing: 2});
 
 		this.load.image('grid_bg', 'https://i.imgur.com/IH2Xlq7.png');
 		this.load.image('node_trigger', 'assets/circle.png');
 		this.load.image('pactileset', 'https://i.imgur.com/0nTnnpf.png');
+		this.load.image('blue_bar', 'assets/blue_bar.png');
 
 		this.load.tilemapTiledJSON('stage_1', 'src/stages/stage_1.json');
 
@@ -27,6 +29,7 @@ var Stage_1 = new Phaser.Class({
 
 		this.stage.setPlayer(dummy_target);
 		this.stage.setPacman(this.pacman);
+		this.stage.generateEvents();
 
 		game.canvas.addEventListener('mousedown', function () {
 			game.input.mouse.requestPointerLock();
