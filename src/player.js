@@ -1,3 +1,4 @@
+var player;
 class Player {
 	constructor(scene, x = 0, y = 0) {
 		this.entity = scene.physics.add.sprite(x, y, 'ghost');
@@ -6,7 +7,7 @@ class Player {
 		this.scene = scene;
         this.speed = 100;
         this.cursors = scene.input.keyboard.createCursorKeys();
-
+        player = this;
         scene.anims.create({
             key: 'left',
             frames: scene.anims.generateFrameNumbers('ghost', { start: 0, end: 1 }),
@@ -19,6 +20,11 @@ class Player {
             frameRate: 10,
             repeat: -1
         });
+        scene.anims.create({
+            key: 'stop',
+            frames: [ { key: 'ghost', frame: 0 } ],
+            frameRate: 10,
+        });
 
 	}
 
@@ -26,7 +32,7 @@ class Player {
 	update() {
         if (this.cursors.left.isDown)
         {
-            console.log(this.entity)
+            console.log(player)
             this.entity.setVelocityX(-160);
         
             this.entity.anims.play('left', true);
@@ -37,11 +43,13 @@ class Player {
         
             this.entity.anims.play('right', true);
         } else {
+            this.entity.anims.play('stop', true);
             this.entity.setVelocityX(0);
         }
         
         if (this.cursors.up.isDown && this.entity.body.touching.down)
         {
+            
             this.entity.setVelocityY(-200);
         }
 	}
