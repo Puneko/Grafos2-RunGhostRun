@@ -16,18 +16,16 @@ var Stage_1 = new Phaser.Class({
 		this.load.tilemapTiledJSON('stage_1', 'src/stages/stage_1.json');
 
 		this.load.audio('snake', 'https://dl.dropbox.com/s/g4axwvihpfedjou/snake%3F.ogg');
+		this.load.spritesheet('ghost', 'https://i.imgur.com/LQmi5bg.png', {frameWidth: 28, frameHeight: 28});
 	},
 
 	create: function () {
 		this.stage = new Stage(this, 'stage_1', 'pactileset');
 
-		var dummy_target = this.physics.add.image(this.stage.player_spawn_point.x, this.stage.player_spawn_point.y, 'nothing');
-		dummy_target.setCollideWorldBounds(true);
-		dummy_target.entity = dummy_target;
+		this.ghost = new Player(this, this.stage.player_spawn_point.x, this.stage.player_spawn_point.y);
+		this.pacman = new Enemy(this, this.stage.pacman_spawn_point.x, this.stage.pacman_spawn_point.y, this.ghost);
 
-		this.pacman = new Enemy(this, this.stage.pacman_spawn_point.x, this.stage.pacman_spawn_point.y, dummy_target);
-
-		this.stage.setPlayer(dummy_target);
+		this.stage.setPlayer(this.ghost);
 		this.stage.setPacman(this.pacman);
 		this.stage.generateEvents();
 
@@ -35,22 +33,13 @@ var Stage_1 = new Phaser.Class({
 			game.input.mouse.requestPointerLock();
 		});
 
-		this.input.on('pointermove', (e) => {
-			dummy_target.setVelocityX(e.movementX * 4);
-			dummy_target.setVelocityY(e.movementY * 4);
-		});
-
-		this.input.on('pointerwheel', (e) => {
-			this.pacman.target.destroy();
-			this.pacman.target = null;
-		});
-
 		this.cameras.main.setZoom(4);
-		this.cameras.main.startFollow(dummy_target);
+		this.cameras.main.startFollow(this.ghost.entity);
 	},
 
 	update: function() {
 		this.pacman.update();
+		this.ghost.update();
 	}
 });
 

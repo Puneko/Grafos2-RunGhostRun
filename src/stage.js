@@ -86,7 +86,7 @@ class Stage {
 								let door = this.scene.physics.add.image(effect.x, effect.y, 'blue_bar').setOrigin(0).setScale(1, effect.height/16).setImmovable();
 								door.body.setAllowGravity(false);
 
-								this.scene.physics.add.collider(door, this.player);
+								this.scene.physics.add.collider(door, this.player.entity);
 								this.scene.physics.add.collider(door, this.pacman.entity);
 
 								this.scene.tweens.add({
