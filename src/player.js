@@ -52,7 +52,7 @@ class Player {
             this.entity.setVelocityX(0);
         }
         
-        if (this.cursors.up.isDown && this.entity.body.touching.down)
+        if (this.cursors.up.isDown && this.entity.body.blocked.down)
         {
             
             this.entity.setVelocityY(-400);
