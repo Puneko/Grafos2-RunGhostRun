@@ -54,10 +54,17 @@ class Stage {
 
 	setPlayer(player) {
 		this.scene.physics.add.collider(player.entity, this.wall_layer);
+		var wasColliding;
 
 		this.node_triggers.forEach((trigger) => {
 			this.scene.physics.add.overlap(trigger, player.entity, () => {
 				trigger.setTint(0xff0000);
+				
+				if(!wasColliding)
+					player.entity.body.blocked.down = false;
+			}, () => {
+				wasColliding = player.entity.body.blocked.down;
+				return true;
 			});
 		});
 
@@ -73,9 +80,13 @@ class Stage {
 	generateEvents() {
 		this.stage_info.events.forEach((event) => {
 			let event_trigger = this.scene.add.sprite(event.x, event.y, 'switch', 0).setOrigin(0);
+			var wasColliding;
 			this.scene.physics.add.staticGroup(event_trigger);
 
 			this.scene.physics.add.overlap(event_trigger, this.player.entity, () => {
+				if(!wasColliding)
+					player.entity.body.blocked.down = false;
+				
 				if(!event.once) {
 					event_trigger.setFrame(1);
 					event.once = true;
@@ -104,6 +115,8 @@ class Stage {
 						}
 					});
 				}
+			}, () => {
+				wasColliding = player.entity.body.blocked.down;
 			});
 		});
 	}
