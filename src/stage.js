@@ -34,8 +34,22 @@ class Stage {
 		});
 	}
 
-	updatePacmanNodes() {
-		return;
+	updatePacmanNodes(change) {
+		let node_edges = this.pacman_graph.getVertex(change.node).edges;
+		for(let c = 0; c < node_edges.length; c += 1) {
+			if(node_edges[c].edge == change.edge) {
+				node_edges[c].weight = change.weight;
+				break;
+			}
+		}
+
+		node_edges = this.pacman_graph.getVertex(change.edge).edges;
+		for(let c = 0; c < node_edges.length; c += 1) {
+			if(node_edges[c].edge == change.node) {
+				node_edges[c].weight = change.weight;
+				break;
+			}
+		}
 	}
 
 	setPlayer(player) {
@@ -85,7 +99,7 @@ class Stage {
 								break;
 
 							case 'graph':
-								this.updatePacmanNodes();
+								this.updatePacmanNodes(effect);
 								break;
 						}
 					});

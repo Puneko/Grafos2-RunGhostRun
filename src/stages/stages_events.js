@@ -67,8 +67,8 @@ var stages_info = new Map().set('stage_1', {
 
 				{
 					type: 'graph',
-					node: 6,
-					edge: 7,
+					node: 5,
+					edge: 6,
 					weight: Infinity
 				}
 			]
