@@ -1,6 +1,7 @@
 var player;
 class Player {
 	constructor(scene, x = 0, y = 0) {
+        this.isAlive = true;
 		this.entity = scene.physics.add.sprite(x, y, 'ghost');
 		this.entity.setCollideWorldBounds(true);
         this.entity.setGravityY(300);
@@ -25,14 +26,18 @@ class Player {
             frames: [ { key: 'ghost', frame: 0 } ],
             frameRate: 10,
         });
-
 	}
 
+    kill(){
+        this.isAlive = false;
+        this.entity.destroy();
+    }
 
-	update() {
+	update() {[]
+        if(!this.isAlive)
+            return
         if (this.cursors.left.isDown)
         {
-            console.log(player)
             this.entity.setVelocityX(-160);
         
             this.entity.anims.play('left', true);
@@ -50,7 +55,7 @@ class Player {
         if (this.cursors.up.isDown && this.entity.body.touching.down)
         {
             
-            this.entity.setVelocityY(-200);
+            this.entity.setVelocityY(-400);
         }
 	}
 }

@@ -15,9 +15,8 @@ var EmptyScene = new Phaser.Class({
 		this.add.image(0, 0, 'grid_bg').setOrigin(0);
 		var dummy_target = this.physics.add.image(this.input.activePointer.x, this.input.activePointer.y, 'nothing');
 		dummy_target.setCollideWorldBounds(true);
-		this.ghost = new Player(this, 400, 400);
-		this.pacman = new Enemy(this, 100, 100, this.ghost.entity);
-		
+		this.ghost = new Player(this, 100, 100);
+		this.pacman = new Enemy(this, 400, 400, this.ghost);
 		game.canvas.addEventListener('mousedown', function () {
 			game.input.mouse.requestPointerLock();
 		});

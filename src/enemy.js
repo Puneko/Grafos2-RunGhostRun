@@ -4,13 +4,13 @@ class Enemy {
 		this.entity.setCollideWorldBounds(true);
 		this.entity.setGravity(0);
 
-		this.target = target;
+		this.target = target.entity;
 		this.scene = scene;
 		this.speed = 100;
-
+		
 		scene.physics.add.collider(this.entity, this.target, () => {
 			scene.sound.add('snake').play();
-			this.target.destroy();
+			target.kill();
 			this.target = null;
 		});
 
@@ -31,6 +31,7 @@ class Enemy {
 	}
 
 	update() {
+		
 		if(this.target)
 			this.followTarget();
 		else
