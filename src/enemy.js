@@ -23,6 +23,8 @@ class Enemy {
 		});
 
 		this.path = [];
+		this.colliders = [];
+
 		this.entity.anims.play('pac_waka', true);
 	}
 
@@ -31,12 +33,12 @@ class Enemy {
 		this.scene.physics.velocityFromRotation(this.entity.rotation, this.speed, this.entity.body.velocity);
 	}
 
-	setCollisionLayer(collision_layer) {
-		this.collision_layer = collision_layer;
+	addCollider(collider) {
+		this.colliders.push(collider);
 	}
 
 	updatePath() {
-		this.path = getBestPath(this.pacman_graph, this.path[0].index, 11);
+		this.path = getBestPath(this.pacman_graph, this.path[0].index, this.path.pop().index);
 		this.path = this.path.map((node) => {return this.pacman_graph.getVertex(node)});
 	}
 
@@ -47,7 +49,7 @@ class Enemy {
 
 	getState() {
 		if(this.target) {
-			if(cast_ray_into_tilemap(this.entity.x, this.entity.y, this.target.x, this.target.y, this.collision_layer).length)
+			if(raycast(this.entity.x, this.entity.y, this.target.x, this.target.y, this.colliders))
 				return 2;
 			return 1;
 		}
@@ -55,12 +57,45 @@ class Enemy {
 		return 0;
 	}
 
+	getNodesByDistance() {
+		let nodes = new Heapify(this.path.length);
+
+		this.path.forEach((node) => {
+			nodes.push(node, getDistance({x: this.entity.x, y: this.entity.y}, {x: node.position.x, y: node.position.y}) + 1);
+		});
+
+		return nodes;
+	}
+
+	checkNodeReachability(node) {
+		if(!raycast(this.entity.x, this.entity.y, node.position.x, node.position.y, this.colliders, true))
+			return true;
+
+		if(!raycast(this.entity.x, this.entity.y, node.position.x, node.position.y, this.colliders, true))
+			return true;
+
+		if(!raycast(node.position.x, this.entity.y, node.position.x, node.position.y, this.colliders, true))
+			return true;
+
+		if(!raycast(this.entity.x, node.position.y, node.position.x, node.position.y, this.colliders, true))
+			return true;
+
+		return false;
+	}
+
 	update() {
 		let state = this.getState();
 		switch(state) {
 			case 2:
-				if(this.update.previous_state != 2)
+				if(this.update.previous_state != 2) {
+					let sorted_nodes = this.getNodesByDistance();
+					let closest_node = sorted_nodes.pop();
+					if(this.checkNodeReachability(closest_node))
+						this.path.unshift(closest_node);
+
 					this.updatePath();
+				}
+
 				this.followPath();
 				break;
 			case 1:

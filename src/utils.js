@@ -33,11 +33,13 @@ function getDistance(pointA, pointB) {
 	return Math.sqrt(Math.pow(pointA.x - pointB.x, 2) + Math.pow(pointA.y - pointB.y, 2));
 }
 
-function raycast(x0, y0, x1, y1, colliders) {
+function raycast(x0, y0, x1, y1, colliders, debug = false) {
 	let ray = new Phaser.Geom.Line(x0, y0, x1, y1);
-	let graph = game.scene.scenes[0].add.graphics();
-	graph.lineStyle(1, 0x00ff00);
-    graph.strokeLineShape(ray);
+	if(debug) {
+		let graph = game.scene.scenes[0].add.graphics();
+		graph.lineStyle(1, 0x00ff00);
+	    graph.strokeLineShape(ray);
+	}
 	var points;
 
 	for(let c = 0; c < colliders.length; c += 1) {

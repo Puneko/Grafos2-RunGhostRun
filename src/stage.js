@@ -63,7 +63,7 @@ class Stage {
 			this.scene.physics.add.overlap(trigger, player.entity, () => {
 				if (player.lastTrigger != trigger.node_index) {
 					let index;
-					//nodes that aren't part of happy path will crash
+
 					for(let c = 0; c < this.happy_path.length; c += 1) {
 						if(this.happy_path[c].index == trigger.node_index) {
 							if(this.happy_path[c + 1])
@@ -73,6 +73,9 @@ class Stage {
 							break;
 						}
 					}
+
+					if(!index)
+						index = this.stage_info.last_node;
 
 					this.pacman.path.push(this.pacman_graph.getVertex(index));
 					this.pacman.updatePath();
@@ -103,7 +106,7 @@ class Stage {
 			this.scene.physics.add.overlap(trigger, pacman.entity, () => {
 				pacman.path.shift();
 			}, () => {
-				if(pacman.path[0].position.x == trigger.x && pacman.path[0].position.y == trigger.y)
+				if(pacman.path[0].index == trigger.node_index)
 					return true;
 				return false;
 			});
