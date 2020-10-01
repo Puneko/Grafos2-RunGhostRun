@@ -26,8 +26,8 @@ var Stage_1 = new Phaser.Class({
 		this.pacman = new Enemy(this, this.stage.pacman_spawn_point.x, this.stage.pacman_spawn_point.y, this.ghost);
 		this.pacman.entity.setScale(0.25);
 
-		this.stage.setPlayer(this.ghost);
 		this.stage.setPacman(this.pacman);
+		this.stage.setPlayer(this.ghost);
 		this.stage.generateEvents();
 
 		game.canvas.addEventListener('mousedown', function () {

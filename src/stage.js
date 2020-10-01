@@ -30,8 +30,11 @@ class Stage {
 			node.edge.forEach((edge) => this.pacman_graph.addEdge(node.index, edge, getDistance(node_position, this.pacman_graph.getVertex(edge).position)));
 
 			this.scene.physics.add.staticGroup(node_trigger);
+			node_trigger.node_index = node.index;
 			this.node_triggers.push(node_trigger);
 		});
+
+		this.happy_path = getBestPath(this.pacman_graph, this.stage_info.first_node, this.stage_info.last_node).map((node) => {return this.pacman_graph.getVertex(node)});
 	}
 
 	updatePacmanNodes(change) {
@@ -58,8 +61,27 @@ class Stage {
 
 		this.node_triggers.forEach((trigger) => {
 			this.scene.physics.add.overlap(trigger, player.entity, () => {
+				if (player.lastTrigger != trigger.node_index) {
+					let index;
+					//nodes that aren't part of happy path will crash
+					for(let c = 0; c < this.happy_path.length; c += 1) {
+						if(this.happy_path[c].index == trigger.node_index) {
+							if(this.happy_path[c + 1])
+								index = c + 1;
+							else
+								index = c;
+							break;
+						}
+					}
+
+					this.pacman.path.push(this.pacman_graph.getVertex(index));
+					this.pacman.updatePath();
+
+					player.lastTrigger = trigger.node_index;
+				}
 				trigger.setTint(0xff0000);
-				
+
+
 				if(!wasColliding)
 					player.entity.body.blocked.down = false;
 			}, () => {
@@ -73,10 +95,9 @@ class Stage {
 
 	setPacman(pacman) {
 		this.scene.physics.add.collider(pacman.entity, this.wall_layer);
-		pacman.setCollisionLayer(this.wall_layer);
+		pacman.addCollider(this.wall_layer);
 		pacman.pacman_graph = this.pacman_graph;
-		pacman.path.push(this.pacman_graph.getVertex(0));
-		pacman.updatePath();
+		Object.assign(pacman.path, this.happy_path);
 
 		this.node_triggers.forEach((trigger) => {
 			this.scene.physics.add.overlap(trigger, pacman.entity, () => {
@@ -113,6 +134,7 @@ class Stage {
 
 								this.scene.physics.add.collider(door, this.player.entity);
 								this.scene.physics.add.collider(door, this.pacman.entity);
+								this.pacman.addCollider(door);
 
 								this.scene.tweens.add({
 									targets: door,
