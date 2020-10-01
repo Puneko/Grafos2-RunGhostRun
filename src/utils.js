@@ -38,7 +38,7 @@ function getBestPath(graph, start_node, last_node) {
 	let distance = {};
 	let previous = {};
 
-	distances[graph.getVertex(start_node)] = 0;
+	distance[start_node] = 0;
 	priority_queue.push({index: start_node, node: graph.getVertex(start_node)}, 1);
 
 	graph.adjList.forEach((node, index) => {
@@ -51,11 +51,11 @@ function getBestPath(graph, start_node, last_node) {
 		let current_node = priority_queue.pop();
 
 		current_node.node.edges.forEach((edge) => {
-			let cost = edge.weight + distance[node.index];
+			let cost = edge.weight + distance[current_node.index];
 
 			if(cost < distance[edge.edge]) {
 				distance[edge.edge] = cost;
-				previous[edge.edge] = current_node;
+				previous[edge.edge] = current_node.index;
 
 				priority_queue.push({index: edge.edge, node: graph.getVertex(edge.edge)}, cost);
 			}

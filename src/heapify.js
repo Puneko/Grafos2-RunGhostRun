@@ -12,7 +12,7 @@ const ROOT_INDEX = 1;
 class Heapify {
 
     constructor(capacity = 64, keys = [], priorities = [],
-        KeysBackingArrayType = Uint32Array,
+        KeysBackingArrayType = Array,
         PrioritiesBackingArrayType = Uint32Array) {
 
         this._capacity = capacity;
