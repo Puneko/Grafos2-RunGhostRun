@@ -33,9 +33,57 @@ function getDistance(pointA, pointB) {
 	return Math.sqrt(Math.pow(pointA.x - pointB.x, 2) + Math.pow(pointA.y - pointB.y, 2));
 }
 
-function cast_ray_into_tilemap(x0, y0, x1, y1, layer) {
-	ray = new Phaser.Geom.Line(x0, y0, x1, y1);
-	return layer.getTilesWithinShape(ray, {isNotEmpty: true})
+function raycast(x0, y0, x1, y1, colliders) {
+	let ray = new Phaser.Geom.Line(x0, y0, x1, y1);
+	let graph = game.scene.scenes[0].add.graphics();
+	graph.lineStyle(1, 0x00ff00);
+    graph.strokeLineShape(ray);
+	var points;
+
+	for(let c = 0; c < colliders.length; c += 1) {
+		if(!(colliders[c] instanceof Phaser.Tilemaps.StaticTilemapLayer)) {
+			if(!points)
+				points = Phaser.Geom.Line.GetPoints(ray, 0, 7);
+			let collider_bounds = colliders[c].getBounds();
+
+			for(let k = 0; k < points.length; k += 1) {
+				if(collider_bounds.contains(points[k].x, points[k].y))
+					return true;
+			}
+		}
+
+		else
+			if(colliders[c].getTilesWithinShape(ray, {isNotEmpty: true}).length)
+				return true;
+	}
+
+	return false;
+}
+
+function get_raycast_collisions(x0, y0, x1, y1, [colliders]) {
+	let colliding_objects = [];
+	let ray = new Phaser.Geom.Line(x0, y0, x1, y1);
+	var points;
+
+	colliders.forEach((collider) => {
+		if(!(collider instanceof Phaser.Tilemaps.StaticTilemapLayer)) {
+			if(!points)
+				points = Phaser.Geom.Line.GetPoints(ray, 0, 7);
+			let collider_bounds = collider.getBounds();
+
+			for(let c = 0; c < points.length; c += 1) {
+				if(collider_bounds.contains(points[c].x, points[c].y)) {
+					colliding_objects.push(collider);
+					break;
+				}
+			}
+		}
+
+		else
+			colliding_objects.concat(collider.getTilesWithinShape(ray, {isNotEmpty: true}));
+	});
+
+	return colliding_objects;
 }
 
 function getBestPath(graph, start_node, last_node) {
