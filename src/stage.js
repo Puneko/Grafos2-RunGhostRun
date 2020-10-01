@@ -73,7 +73,9 @@ class Stage {
 
 	setPacman(pacman) {
 		this.scene.physics.add.collider(pacman.entity, this.wall_layer);
+		pacman.setCollisionLayer(this.wall_layer);
 
+		pacman.pacman_graph = this.pacman_graph;
 		this.pacman = pacman;
 	}
 

@@ -22,6 +22,8 @@ class Enemy {
 			repeat: -1
 		});
 
+		this.path = [];
+		this.path_position = 0;
 		this.entity.anims.play('pac_waka', true);
 	}
 
@@ -30,11 +32,49 @@ class Enemy {
 		this.scene.physics.velocityFromRotation(this.entity.rotation, this.speed, this.entity.body.velocity);
 	}
 
+	setCollisionLayer(collision_layer) {
+		this.collision_layer = collision_layer;
+	}
+
+	updatePath() {
+		this.path = getBestPath(this.pacman_graph, this.path_position, 11);
+		this.path = this.path.map((node) => {return this.pacman_graph.getVertex(node)});
+	}
+
+	followPath(new_movement) {
+		if(new_movement != 2) {
+			this.entity.rotation = Phaser.Math.Angle.Between(this.entity.x, this.entity.y, this.path[0].position.x, this.path[0].position.y);
+			this.scene.physics.velocityFromRotation(this.entity.rotation, this.speed, this.entity.body.velocity);
+		}
+	}
+
+	getState() {
+		if(this.target) {
+			if(cast_ray_into_tilemap(this.entity.x, this.entity.y, this.target.x, this.target.y, this.collision_layer).length)
+				return 2;
+			return 1;
+		}
+
+		return 0;
+	}
+
 	update() {
-		
-		if(this.target)
-			this.followTarget();
-		else
-			this.entity.setVelocity(0);
+		let state = this.getState();
+		switch(state) {
+			case 2:
+				if(this.update.previous_state != 2)
+					this.updatePath();
+				this.followPath(this.update.previous_state);
+				break;
+			case 1:
+				this.followTarget();
+				break;
+			case 0:
+				if(this.entity.body.velocity.x || this.entity.body.velocity.y)
+					this.entity.setVelocity(0);
+				break;
+		}
+
+		this.update.previous_state = state;
 	}
 }

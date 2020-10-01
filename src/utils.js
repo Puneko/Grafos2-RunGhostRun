@@ -33,6 +33,11 @@ function getDistance(pointA, pointB) {
 	return Math.sqrt(Math.pow(pointA.x - pointB.x, 2) + Math.pow(pointA.y - pointB.y, 2));
 }
 
+function cast_ray_into_tilemap(x0, y0, x1, y1, layer) {
+	ray = new Phaser.Geom.Line(x0, y0, x1, y1);
+	return layer.getTilesWithinShape(ray, {isNotEmpty: true})
+}
+
 function getBestPath(graph, start_node, last_node) {
 	let priority_queue = new Heapify(graph.getSize());
 	let distance = {};
