@@ -21,7 +21,7 @@ class Stage {
 		this.pacman_graph = new UndirectedGraph();
 		this.node_triggers = [];
 
-		this.stage_info.graph.forEach((node) => this.pacman_graph.addVertex(node.index, {position: {x: node.x, y: node.y}}));
+		this.stage_info.graph.forEach((node) => this.pacman_graph.addVertex(node.index, {position: {x: node.x, y: node.y}, index: node.index}));
 
 		this.stage_info.graph.forEach((node) => {
 			var node_position = this.pacman_graph.getVertex(node.index).position;
@@ -74,8 +74,20 @@ class Stage {
 	setPacman(pacman) {
 		this.scene.physics.add.collider(pacman.entity, this.wall_layer);
 		pacman.setCollisionLayer(this.wall_layer);
-
 		pacman.pacman_graph = this.pacman_graph;
+		pacman.path.push(this.pacman_graph.getVertex(0));
+		pacman.updatePath();
+
+		this.node_triggers.forEach((trigger) => {
+			this.scene.physics.add.overlap(trigger, pacman.entity, () => {
+				pacman.path.shift();
+			}, () => {
+				if(pacman.path[0].position.x == trigger.x && pacman.path[0].position.y == trigger.y)
+					return true;
+				return false;
+			});
+		});
+
 		this.pacman = pacman;
 	}
 

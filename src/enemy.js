@@ -2,7 +2,7 @@ class Enemy {
 	constructor(scene, x = 0, y = 0, target = null) {
 		this.entity = scene.physics.add.sprite(x, y, 'pacman');
 		this.entity.setCollideWorldBounds(true);
-		this.entity.setGravity(0);
+		this.entity.body.setAllowGravity(false);
 
 		this.target = target.entity;
 		this.scene = scene;
@@ -23,7 +23,6 @@ class Enemy {
 		});
 
 		this.path = [];
-		this.path_position = 0;
 		this.entity.anims.play('pac_waka', true);
 	}
 
@@ -37,15 +36,13 @@ class Enemy {
 	}
 
 	updatePath() {
-		this.path = getBestPath(this.pacman_graph, this.path_position, 11);
+		this.path = getBestPath(this.pacman_graph, this.path[0].index, 11);
 		this.path = this.path.map((node) => {return this.pacman_graph.getVertex(node)});
 	}
 
-	followPath(new_movement) {
-		if(new_movement != 2) {
-			this.entity.rotation = Phaser.Math.Angle.Between(this.entity.x, this.entity.y, this.path[0].position.x, this.path[0].position.y);
-			this.scene.physics.velocityFromRotation(this.entity.rotation, this.speed, this.entity.body.velocity);
-		}
+	followPath() {
+		this.entity.rotation = Phaser.Math.Angle.Between(this.entity.x, this.entity.y, this.path[0].position.x, this.path[0].position.y);
+		this.scene.physics.velocityFromRotation(this.entity.rotation, this.speed, this.entity.body.velocity);
 	}
 
 	getState() {
@@ -64,7 +61,7 @@ class Enemy {
 			case 2:
 				if(this.update.previous_state != 2)
 					this.updatePath();
-				this.followPath(this.update.previous_state);
+				this.followPath();
 				break;
 			case 1:
 				this.followTarget();
