@@ -7,6 +7,7 @@ class Player {
         this.entity.setGravityY(300);
 		this.scene = scene;
         this.speed = 100;
+        this.last_trigger;
         this.cursors = scene.input.keyboard.createCursorKeys();
         player = this;
         scene.anims.create({

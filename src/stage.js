@@ -4,41 +4,39 @@ class Stage {
 
 		this.map = scene.make.tilemap({ key: stage_name });
 		this.tileset = this.map.addTilesetImage(tileset);
-
 		this.wall_layer = this.map.createStaticLayer('Walls', tileset, 0, 0);
 
 		this.stage_info = stages_info.get(stage_name);
 		this.player_spawn_point = this.stage_info.player_spawn_point;
 		this.pacman_spawn_point = this.stage_info.pacman_spawn_point;
 		this.end_area = this.stage_info.end_area;
-		
-		this.generatePacmanNodes();
 
 		this.wall_layer.setCollisionByExclusion([-1]);
 	}
 	
 	generatePacmanNodes() {
-		this.pacman_graph = new UndirectedGraph();
+		this.pacman.pacman_graph = new UndirectedGraph();
 		this.node_triggers = [];
 
-		this.stage_info.graph.forEach((node) => this.pacman_graph.addVertex(node.index, {position: {x: node.x, y: node.y}, index: node.index}));
+		this.stage_info.graph.forEach((node) => this.pacman.pacman_graph.addVertex(node.index, {position: {x: node.x, y: node.y}, index: node.index}));
 
 		this.stage_info.graph.forEach((node) => {
-			var node_position = this.pacman_graph.getVertex(node.index).position;
+			var node_position = this.pacman.pacman_graph.getVertex(node.index).position;
 			let node_trigger = this.scene.add.image(node_position.x, node_position.y, 'node_trigger');
 
-			node.edge.forEach((edge) => this.pacman_graph.addEdge(node.index, edge, getDistance(node_position, this.pacman_graph.getVertex(edge).position)));
+			node.edge.forEach((edge) => this.pacman.pacman_graph.addEdge(node.index, edge, getDistance(node_position, this.pacman.pacman_graph.getVertex(edge).position)));
 
 			this.scene.physics.add.staticGroup(node_trigger);
 			node_trigger.node_index = node.index;
 			this.node_triggers.push(node_trigger);
 		});
 
-		this.happy_path = getBestPath(this.pacman_graph, this.stage_info.first_node, this.stage_info.last_node).map((node) => {return this.pacman_graph.getVertex(node)});
+		if(!this.happy_path)
+			this.happy_path = getBestPath(this.pacman.pacman_graph, this.stage_info.first_node, this.stage_info.last_node).map((node) => {return this.pacman.pacman_graph.getVertex(node)});
 	}
 
 	updatePacmanNodes(change) {
-		let node_edges = this.pacman_graph.getVertex(change.node).edges;
+		let node_edges = this.pacman.pacman_graph.getVertex(change.node).edges;
 		for(let c = 0; c < node_edges.length; c += 1) {
 			if(node_edges[c].edge == change.edge) {
 				node_edges[c].weight = change.weight;
@@ -46,7 +44,7 @@ class Stage {
 			}
 		}
 
-		node_edges = this.pacman_graph.getVertex(change.edge).edges;
+		node_edges = this.pacman.pacman_graph.getVertex(change.edge).edges;
 		for(let c = 0; c < node_edges.length; c += 1) {
 			if(node_edges[c].edge == change.node) {
 				node_edges[c].weight = change.weight;
@@ -61,7 +59,7 @@ class Stage {
 
 		this.node_triggers.forEach((trigger) => {
 			this.scene.physics.add.overlap(trigger, player.entity, () => {
-				if (player.lastTrigger != trigger.node_index) {
+				if (player.last_trigger != trigger.node_index) {
 					let index;
 
 					for(let c = 0; c < this.happy_path.length; c += 1) {
@@ -77,11 +75,12 @@ class Stage {
 					if(!index)
 						index = this.stage_info.last_node;
 
-					this.pacman.path.push(this.pacman_graph.getVertex(index));
+					this.pacman.path.push(this.pacman.pacman_graph.getVertex(index));
 					this.pacman.updatePath();
 
-					player.lastTrigger = trigger.node_index;
+					player.last_trigger = trigger.node_index;
 				}
+
 				trigger.setTint(0xff0000);
 
 
@@ -97,9 +96,11 @@ class Stage {
 	}
 
 	setPacman(pacman) {
+		this.pacman = pacman;
+		this.generatePacmanNodes();
+
 		this.scene.physics.add.collider(pacman.entity, this.wall_layer);
 		pacman.addCollider(this.wall_layer);
-		pacman.pacman_graph = this.pacman_graph;
 		Object.assign(pacman.path, this.happy_path);
 
 		this.node_triggers.forEach((trigger) => {
@@ -111,8 +112,6 @@ class Stage {
 				return false;
 			});
 		});
-
-		this.pacman = pacman;
 	}
 
 	generateEvents() {
@@ -150,6 +149,23 @@ class Stage {
 
 							case 'graph':
 								this.updatePacmanNodes(effect);
+								let sorted_nodes = this.pacman.getNodesByDistance();
+								// console.log(JSON.parse(JSON.stringify(sorted_nodes)))
+								let node;
+								while((node = sorted_nodes.pop())) {
+									console.log(node)
+									if(this.pacman.checkNodeReachability(node)) {
+										this.pacman.path.unshift(node);
+										this.pacman.updatePath();
+										console.log(JSON.parse(JSON.stringify(this.pacman.path)))
+
+										while(this.pacman.path[1] && this.pacman.checkNodeReachability(this.pacman.path[1]))
+											this.pacman.path.shift();
+										// console.log(JSON.parse(JSON.stringify(this.pacman.path)))
+										break;
+									}
+								}
+
 								break;
 						}
 					});

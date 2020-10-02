@@ -48,10 +48,9 @@ function raycast(x0, y0, x1, y1, colliders, debug = false) {
 				points = Phaser.Geom.Line.GetPoints(ray, 0, 7);
 			let collider_bounds = colliders[c].getBounds();
 
-			for(let k = 0; k < points.length; k += 1) {
+			for(let k = 0; k < points.length; k += 1)
 				if(collider_bounds.contains(points[k].x, points[k].y))
 					return true;
-			}
 		}
 
 		else
