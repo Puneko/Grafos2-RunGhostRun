@@ -4,38 +4,39 @@ class Stage {
 
 		this.map = scene.make.tilemap({ key: stage_name });
 		this.tileset = this.map.addTilesetImage(tileset);
-
 		this.wall_layer = this.map.createStaticLayer('Walls', tileset, 0, 0);
 
 		this.stage_info = stages_info.get(stage_name);
 		this.player_spawn_point = this.stage_info.player_spawn_point;
 		this.pacman_spawn_point = this.stage_info.pacman_spawn_point;
 		this.end_area = this.stage_info.end_area;
-		
-		this.generatePacmanNodes();
 
 		this.wall_layer.setCollisionByExclusion([-1]);
 	}
 	
 	generatePacmanNodes() {
-		this.pacman_graph = new UndirectedGraph();
+		this.pacman.pacman_graph = new UndirectedGraph();
 		this.node_triggers = [];
 
-		this.stage_info.graph.forEach((node) => this.pacman_graph.addVertex(node.index, {position: {x: node.x, y: node.y}}));
+		this.stage_info.graph.forEach((node) => this.pacman.pacman_graph.addVertex(node.index, {position: {x: node.x, y: node.y}, index: node.index}));
 
 		this.stage_info.graph.forEach((node) => {
-			var node_position = this.pacman_graph.getVertex(node.index).position;
-			let node_trigger = this.scene.add.image(node_position.x, node_position.y, 'node_trigger');
+			var node_position = this.pacman.pacman_graph.getVertex(node.index).position;
+			let node_trigger = this.scene.add.image(node_position.x, node_position.y, 'node_trigger').setAlpha(0);
 
-			node.edge.forEach((edge) => this.pacman_graph.addEdge(node.index, edge, getDistance(node_position, this.pacman_graph.getVertex(edge).position)));
+			node.edge.forEach((edge) => this.pacman.pacman_graph.addEdge(node.index, edge, getDistance(node_position, this.pacman.pacman_graph.getVertex(edge).position)));
 
 			this.scene.physics.add.staticGroup(node_trigger);
+			node_trigger.node_index = node.index;
 			this.node_triggers.push(node_trigger);
 		});
+
+		if(!this.happy_path)
+			this.happy_path = getBestPath(this.pacman.pacman_graph, this.stage_info.first_node, this.stage_info.last_node).map((node) => {return this.pacman.pacman_graph.getVertex(node)});
 	}
 
 	updatePacmanNodes(change) {
-		let node_edges = this.pacman_graph.getVertex(change.node).edges;
+		let node_edges = this.pacman.pacman_graph.getVertex(change.node).edges;
 		for(let c = 0; c < node_edges.length; c += 1) {
 			if(node_edges[c].edge == change.edge) {
 				node_edges[c].weight = change.weight;
@@ -43,7 +44,7 @@ class Stage {
 			}
 		}
 
-		node_edges = this.pacman_graph.getVertex(change.edge).edges;
+		node_edges = this.pacman.pacman_graph.getVertex(change.edge).edges;
 		for(let c = 0; c < node_edges.length; c += 1) {
 			if(node_edges[c].edge == change.node) {
 				node_edges[c].weight = change.weight;
@@ -58,8 +59,29 @@ class Stage {
 
 		this.node_triggers.forEach((trigger) => {
 			this.scene.physics.add.overlap(trigger, player.entity, () => {
-				trigger.setTint(0xff0000);
-				
+				if (player.last_trigger != trigger.node_index) {
+					let index;
+
+					for(let c = 0; c < this.happy_path.length; c += 1) {
+						if(this.happy_path[c].index == trigger.node_index) {
+							if(this.happy_path[c + 1])
+								index = c + 1;
+							else
+								index = c;
+							break;
+						}
+					}
+
+					if(!index)
+						index = this.stage_info.last_node;
+
+					this.pacman.path.push(this.pacman.pacman_graph.getVertex(index));
+					this.pacman.updatePath();
+
+					player.last_trigger = trigger.node_index;
+				}
+
+
 				if(!wasColliding)
 					player.entity.body.blocked.down = false;
 			}, () => {
@@ -72,9 +94,22 @@ class Stage {
 	}
 
 	setPacman(pacman) {
-		this.scene.physics.add.collider(pacman.entity, this.wall_layer);
-
 		this.pacman = pacman;
+		this.generatePacmanNodes();
+
+		this.scene.physics.add.collider(pacman.entity, this.wall_layer);
+		pacman.addCollider(this.wall_layer);
+		Object.assign(pacman.path, this.happy_path);
+
+		this.node_triggers.forEach((trigger) => {
+			this.scene.physics.add.overlap(trigger, pacman.entity, () => {
+				pacman.path.shift();
+			}, () => {
+				if(pacman.path[0].index == trigger.node_index)
+					return true;
+				return false;
+			});
+		});
 	}
 
 	generateEvents() {
@@ -94,14 +129,17 @@ class Stage {
 					event.affects.forEach((effect) => {
 						switch(effect.type) {
 							case 'door':
-								let door = this.scene.physics.add.image(effect.x, effect.y, 'blue_bar').setOrigin(0).setScale(1, effect.height/16).setImmovable();
+								let door = this.scene.physics.add.image(effect.x, effect.transition.y, 'blue_bar').setOrigin(0).setScale(1, effect.height/16).setImmovable().setAlpha(0);
+								let fake_door = this.scene.add.image(effect.x, effect.y, 'blue_bar').setOrigin(0).setScale(1, effect.height/16);
 								door.body.setAllowGravity(false);
+
 
 								this.scene.physics.add.collider(door, this.player.entity);
 								this.scene.physics.add.collider(door, this.pacman.entity);
+								this.pacman.addCollider(door);
 
 								this.scene.tweens.add({
-									targets: door,
+									targets: fake_door,
 									duration: 500,
 									ease: 'Sine.easeIn',
 									y: effect.transition.y
@@ -111,6 +149,21 @@ class Stage {
 
 							case 'graph':
 								this.updatePacmanNodes(effect);
+								let sorted_nodes = this.pacman.getNodesByDistance();
+								let node;
+
+								while((node = sorted_nodes.pop())) {
+									if(this.pacman.checkNodeReachability(node)) {
+										this.pacman.path.unshift(node);
+										this.pacman.updatePath();
+
+										while(this.pacman.path[1] && this.pacman.checkNodeReachability(this.pacman.path[1])){
+											this.pacman.path.shift();
+										}
+										break;
+									}
+								}
+
 								break;
 						}
 					});

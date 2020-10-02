@@ -10,7 +10,7 @@ var Stage_1 = new Phaser.Class({
 
 		this.load.image('grid_bg', 'https://i.imgur.com/IH2Xlq7.png');
 		this.load.image('node_trigger', 'assets/circle.png');
-		this.load.image('pactileset', 'https://i.imgur.com/0nTnnpf.png');
+		this.load.image('pactileset', 'https://i.imgur.com/m6pk1wQ.png');
 		this.load.image('blue_bar', 'assets/blue_bar.png');
 
 		this.load.tilemapTiledJSON('stage_1', 'src/stages/stage_1.json');
@@ -27,8 +27,8 @@ var Stage_1 = new Phaser.Class({
 		this.ghost = new Player(this, this.stage.player_spawn_point.x, this.stage.player_spawn_point.y);
 		this.pacman = new Enemy(this, this.stage.pacman_spawn_point.x, this.stage.pacman_spawn_point.y, this.ghost);
 
-		this.stage.setPlayer(this.ghost);
 		this.stage.setPacman(this.pacman);
+		this.stage.setPlayer(this.ghost);
 		this.stage.generateEvents();
 
 		game.canvas.addEventListener('mousedown', function () {

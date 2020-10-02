@@ -187,5 +187,8 @@ var stages_info = new Map().set('stage_1', {
 			y: 23 * 16 + 8,
 			edge: [6]
 		},
-	]
+	],
+
+	first_node: 0,
+	last_node: 11
 });
