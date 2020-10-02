@@ -3,7 +3,8 @@ class Ministage {
 		this.scene = scene;
         this.create();
         this.tileset = this.map.addTilesetImage(tileset);
-		this.layer = this.map.createStaticLayer('layer', tileset, 0, 0);
+        this.layer = this.map.createStaticLayer('layer', tileset, 0, 0);
+        
         console.log("Grid",this.map)
         
 
@@ -16,6 +17,12 @@ class Ministage {
         
 
     }
+    setPlayer(player){
+        
+        this.scene.physics.add.collider(player.entity, this.layer);
+        this.layer.setCollision(1);
+    }
+    
     create(){
         var maze = new Maze(45,80);
         var level = maze.prim();

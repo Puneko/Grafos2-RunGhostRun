@@ -1,5 +1,5 @@
-const _WALL = 1;
-const _PATH = 0;
+const _WALL = 0;
+const _PATH = 1;
 
 class Maze {
     constructor(height, width){
@@ -15,7 +15,8 @@ class Maze {
               this.grid[i][j] = _WALL;
           }
         
-        let cell = {x:Math.floor(Math.random()*this.height), y:Math.floor(Math.random()*this.width)};
+        let cell = {x:0, y:15};
+       
         
         this.grid[cell.x][cell.y] = _PATH;
         let walls = [];
