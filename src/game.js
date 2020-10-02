@@ -20,6 +20,8 @@ var Stage_1 = new Phaser.Class({
 	},
 
 	create: function () {
+		this.prim = new Prim(4,4);
+		this.prim.prim();
 		this.stage = new Stage(this, 'stage_1', 'pactileset');
 
 		this.ghost = new Player(this, this.stage.player_spawn_point.x, this.stage.player_spawn_point.y);
