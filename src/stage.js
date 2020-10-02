@@ -22,7 +22,7 @@ class Stage {
 
 		this.stage_info.graph.forEach((node) => {
 			var node_position = this.pacman.pacman_graph.getVertex(node.index).position;
-			let node_trigger = this.scene.add.image(node_position.x, node_position.y, 'node_trigger');
+			let node_trigger = this.scene.add.image(node_position.x, node_position.y, 'node_trigger').setAlpha(0);
 
 			node.edge.forEach((edge) => this.pacman.pacman_graph.addEdge(node.index, edge, getDistance(node_position, this.pacman.pacman_graph.getVertex(edge).position)));
 
@@ -81,8 +81,6 @@ class Stage {
 					player.last_trigger = trigger.node_index;
 				}
 
-				trigger.setTint(0xff0000);
-
 
 				if(!wasColliding)
 					player.entity.body.blocked.down = false;
@@ -131,15 +129,17 @@ class Stage {
 					event.affects.forEach((effect) => {
 						switch(effect.type) {
 							case 'door':
-								let door = this.scene.physics.add.image(effect.x, effect.y, 'blue_bar').setOrigin(0).setScale(1, effect.height/16).setImmovable();
+								let door = this.scene.physics.add.image(effect.x, effect.transition.y, 'blue_bar').setOrigin(0).setScale(1, effect.height/16).setImmovable().setAlpha(0);
+								let fake_door = this.scene.add.image(effect.x, effect.y, 'blue_bar').setOrigin(0).setScale(1, effect.height/16);
 								door.body.setAllowGravity(false);
+
 
 								this.scene.physics.add.collider(door, this.player.entity);
 								this.scene.physics.add.collider(door, this.pacman.entity);
 								this.pacman.addCollider(door);
 
 								this.scene.tweens.add({
-									targets: door,
+									targets: fake_door,
 									duration: 500,
 									ease: 'Sine.easeIn',
 									y: effect.transition.y
@@ -150,18 +150,16 @@ class Stage {
 							case 'graph':
 								this.updatePacmanNodes(effect);
 								let sorted_nodes = this.pacman.getNodesByDistance();
-								// console.log(JSON.parse(JSON.stringify(sorted_nodes)))
 								let node;
+
 								while((node = sorted_nodes.pop())) {
-									console.log(node)
 									if(this.pacman.checkNodeReachability(node)) {
 										this.pacman.path.unshift(node);
 										this.pacman.updatePath();
-										console.log(JSON.parse(JSON.stringify(this.pacman.path)))
 
-										while(this.pacman.path[1] && this.pacman.checkNodeReachability(this.pacman.path[1]))
+										while(this.pacman.path[1] && this.pacman.checkNodeReachability(this.pacman.path[1])){
 											this.pacman.path.shift();
-										// console.log(JSON.parse(JSON.stringify(this.pacman.path)))
+										}
 										break;
 									}
 								}

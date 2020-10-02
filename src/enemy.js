@@ -7,6 +7,7 @@ class Enemy {
 		this.target = target.entity;
 		this.scene = scene;
 		this.speed = 100;
+		this.entity.setSize(this.entity.width/4, this.entity.height/4, true);
 		
 		scene.physics.add.collider(this.entity, this.target, () => {
 			scene.sound.add('snake').play();
@@ -70,19 +71,17 @@ class Enemy {
 			nodes.push(node, getDistance({x: this.entity.x, y: this.entity.y}, {x: node.position.x, y: node.position.y}) + 1);
 		});
 
-
-		// console.log(JSON.parse(JSON.stringify(nodes)))
 		return nodes;
 	}
 
 	checkNodeReachability(node) {
-		if(!raycast(this.entity.x, this.entity.y, node.position.x, node.position.y, this.colliders, true))
+		if(!raycast(this.entity.x, this.entity.y, node.position.x, node.position.y, this.colliders))
 			return true;
 
-		if(!(raycast(this.entity.x, this.entity.y, node.position.x, this.entity.y, this.colliders, true) || raycast(node.position.x, this.entity.y, node.position.x, node.position.y, this.colliders, true)))
+		if(!(raycast(this.entity.x, this.entity.y, node.position.x, this.entity.y, this.colliders) || raycast(node.position.x, this.entity.y, node.position.x, node.position.y, this.colliders)))
 			return true;
 
-		if(!(raycast(this.entity.x, this.entity.y, this.entity.x, node.position.y, this.colliders, true) || raycast(this.entity.x, node.position.y, node.position.x, node.position.y, this.colliders, true)))
+		if(!(raycast(this.entity.x, this.entity.y, this.entity.x, node.position.y, this.colliders) || raycast(this.entity.x, node.position.y, node.position.x, node.position.y, this.colliders)))
 			return true;
 
 		return false;
@@ -94,9 +93,20 @@ class Enemy {
 			case 2:
 				if(this.update.previous_state != 2) {
 					let sorted_nodes = this.getNodesByDistance();
-					let closest_node = sorted_nodes.pop();
-					if(this.checkNodeReachability(closest_node))
-						this.path.unshift(closest_node);
+					let node;
+								
+					while((node = sorted_nodes.pop())) {
+						if(this.checkNodeReachability(node)) {
+							this.path.unshift(node);
+							this.updatePath();
+
+							while(this.path[1] && this.checkNodeReachability(this.path[1])){
+								this.path.shift();
+							}
+							break;
+						}
+					}
+
 					this.updatePath();
 				}
 
