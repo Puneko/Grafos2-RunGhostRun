@@ -1,15 +1,12 @@
-const _WALL = 2;
-const _PATH = 1;
+const _WALL = 1;
+const _PATH = 0;
 
-class Prim {
+class Maze {
     constructor(height, width){
         this.height = height;
         this.width = width;
         this.grid = [];
     }
-
-    
-    
 
     prim(){
         for(let i = 0; i < this.height; i++){
@@ -19,7 +16,7 @@ class Prim {
           }
         
         let cell = {x:Math.floor(Math.random()*this.height), y:Math.floor(Math.random()*this.width)};
-        console.log("cell",cell);
+        
         this.grid[cell.x][cell.y] = _PATH;
         let walls = [];
         if(cell.x+1 < this.height)  walls.push({x:cell.x+1, y:cell.y});
@@ -49,11 +46,10 @@ class Prim {
               }
             }
         
-           
-        
           walls.splice(wallIndex, 1);
         }
-       
+        console.table(this.grid)
+       return this.grid;
     }
 
 }

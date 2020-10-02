@@ -17,11 +17,10 @@ var Stage_1 = new Phaser.Class({
 
 		this.load.audio('snake', 'https://dl.dropbox.com/s/g4axwvihpfedjou/snake%3F.ogg');
 		this.load.spritesheet('ghost', 'https://i.imgur.com/LQmi5bg.png', {frameWidth: 28, frameHeight: 28});
+		this.load.image('labTile','assets/labTile.png');
 	},
 
 	create: function () {
-		this.prim = new Prim(60,60);
-		this.prim.prim();
 		this.stage = new Stage(this, 'stage_1', 'pactileset');
 
 		this.ghost = new Player(this, this.stage.player_spawn_point.x, this.stage.player_spawn_point.y);
