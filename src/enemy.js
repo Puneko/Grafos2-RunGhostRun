@@ -10,9 +10,13 @@ class Enemy {
 		this.entity.setSize(this.entity.width/4, this.entity.height/4, true);
 		
 		scene.physics.add.collider(this.entity, this.target, () => {
-			scene.sound.add('snake').play();
 			target.kill();
 			this.target = null;
+
+			scene.events.once('postupdate', () => {
+				game.scene.start('game_over');
+				game.scene.stop(scene.scene.key);
+			});
 		});
 
 		scene.anims.create({
