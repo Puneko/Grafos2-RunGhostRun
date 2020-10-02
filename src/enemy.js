@@ -76,13 +76,13 @@ class Enemy {
 
 	checkNodeReachability(node) {
 		if(!raycast(this.entity.x, this.entity.y, node.position.x, node.position.y, this.colliders))
-			return true;
+			return 1;
 
 		if(!(raycast(this.entity.x, this.entity.y, node.position.x, this.entity.y, this.colliders) || raycast(node.position.x, this.entity.y, node.position.x, node.position.y, this.colliders)))
-			return true;
+			return 2;
 
 		if(!(raycast(this.entity.x, this.entity.y, this.entity.x, node.position.y, this.colliders) || raycast(this.entity.x, node.position.y, node.position.x, node.position.y, this.colliders)))
-			return true;
+			return 3;
 
 		return false;
 	}
@@ -94,15 +94,71 @@ class Enemy {
 				if(this.update.previous_state != 2) {
 					let sorted_nodes = this.getNodesByDistance();
 					let node;
+					let reachability_type;
 								
 					while((node = sorted_nodes.pop())) {
-						if(this.checkNodeReachability(node)) {
+						if((reachability_type = this.checkNodeReachability(node))) {
 							this.path.unshift(node);
 							this.updatePath();
 
-							while(this.path[1] && this.checkNodeReachability(this.path[1])){
+							let reachability_aux;
+
+							while(this.path[1] && (reachability_aux = this.checkNodeReachability(this.path[1]))) {
 								this.path.shift();
+								reachability_type = reachability_aux;
 							}
+
+							let tween;
+
+							switch(reachability_type) {
+								case 2:
+									tween = this.scene.tweens.add({
+										targets: this.entity,
+										duration: 1000 * getDistance({x: this.path[0].position.x, y: this.entity.y}, {x: this.entity.x, y: this.entity.y})/this.speed,
+										x: this.path[0].position.x,
+										y: this.entity.y
+									});
+
+									tween.on('start', () => {
+										if(!this.back_update)
+											this.back_update = this.update;
+										this.update = function() { return; }
+
+										if(this.entity.x > this.path[0].position.x)
+											this.entity.rotation = Math.PI;
+										else
+											this.entity.rotation = 0;
+									});
+
+									tween.on('complete', () => {
+										this.update = this.back_update;
+									});
+									break;
+								case 3:
+									tween = this.scene.tweens.add({
+										targets: this.entity,
+										duration: 1000 * getDistance({x: this.entity.x, y: this.path[0].position.y}, {x: this.entity.x, y: this.entity.y})/this.speed,
+										x: this.entity.x,
+										y: this.path[0].position.y
+									});
+
+									tween.on('start', () => {
+										if(!this.back_update)
+											this.back_update = this.update;
+										this.update = function() { return; }
+
+										if(this.entity.y > this.path[0].position.y)
+											this.entity.rotation = -Math.PI/2;
+										else
+											this.entity.rotation = Math.PI/2;
+									});
+
+									tween.on('complete', () => {
+										this.update = this.back_update;
+									});
+									break;
+							}
+
 							break;
 						}
 					}
