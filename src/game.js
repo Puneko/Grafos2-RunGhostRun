@@ -20,7 +20,7 @@ var Stage_1 = new Phaser.Class({
 	},
 
 	create: function () {
-		this.prim = new Prim(4,4);
+		this.prim = new Prim(60,60);
 		this.prim.prim();
 		this.stage = new Stage(this, 'stage_1', 'pactileset');
 
