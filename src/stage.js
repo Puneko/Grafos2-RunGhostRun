@@ -187,6 +187,11 @@ class Stage {
 														this.pacman.entity.rotation = 0;
 												});
 
+												tween.on('update', () => {
+													if(this.pacman.getState() == 1)
+														tween.complete();
+												});
+
 												tween.on('complete', () => {
 													this.pacman.update = this.pacman.back_update;
 												});
@@ -207,6 +212,11 @@ class Stage {
 														this.pacman.entity.rotation = -Math.PI/2;
 													else
 														this.pacman.entity.rotation = Math.PI/2;
+												});
+
+												tween.on('update', () => {
+													if(this.pacman.getState() == 1)
+														tween.complete();
 												});
 
 												tween.on('complete', () => {

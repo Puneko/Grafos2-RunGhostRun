@@ -130,6 +130,11 @@ class Enemy {
 											this.entity.rotation = 0;
 									});
 
+									tween.on('update', () => {
+										if(this.getState() == 1)
+											tween.complete();
+									});
+
 									tween.on('complete', () => {
 										this.update = this.back_update;
 									});
@@ -151,6 +156,11 @@ class Enemy {
 											this.entity.rotation = -Math.PI/2;
 										else
 											this.entity.rotation = Math.PI/2;
+									});
+
+									tween.on('update', () => {
+										if(this.getState() == 1)
+											tween.complete();
 									});
 
 									tween.on('complete', () => {
