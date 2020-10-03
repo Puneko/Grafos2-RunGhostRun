@@ -11,7 +11,15 @@ class Stage {
 		this.pacman_spawn_point = this.stage_info.pacman_spawn_point;
 		this.end_area = this.stage_info.end_area;
 
+		this.end_area = scene.add.image(this.end_area.start.x, this.end_area.start.y, 'square').setOrigin(0).setAlpha(0).setDisplaySize(this.end_area.end.x - this.end_area.start.x, this.end_area.end.y - this.end_area.start.y);
+		scene.physics.add.staticGroup(this.end_area);
+
 		this.wall_layer.setCollisionByExclusion([-1]);
+
+		this.stage_bgm = scene.sound.add('stage_bgm', {
+			loop: true
+		});
+		this.stage_bgm.play();
 	}
 	
 	generatePacmanNodes() {
@@ -55,6 +63,9 @@ class Stage {
 
 	setPlayer(player) {
 		this.scene.physics.add.collider(player.entity, this.wall_layer);
+		this.scene.physics.add.overlap(player.entity, this.end_area, () => {
+			document.location.reload();
+		});
 		var wasColliding;
 
 		this.node_triggers.forEach((trigger) => {
@@ -95,6 +106,7 @@ class Stage {
 
 	setPacman(pacman) {
 		this.pacman = pacman;
+		this.pacman.stage_bgm = this.stage_bgm;
 		this.generatePacmanNodes();
 
 		this.scene.physics.add.collider(pacman.entity, this.wall_layer);

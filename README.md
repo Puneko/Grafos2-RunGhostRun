@@ -25,6 +25,8 @@ Explique como usar seu projeto caso haja algum passo a passo após o comando de 
 ## Outros 
 Quaisquer outras informações sobre seu projeto podem ser descritas abaixo.
 
-
-
-
+## Créditos
+![Title Theme (8-Bit Style) - Kat](https://opengameart.org/content/title-theme-8-bit-style)
+![Chinese Stock Car Dealer - 5pr1n6](https://opengameart.org/content/chinese-stock-car-dealer)
+![Pac-Font](https://www.dafont.com/pt/pacfont.font)
+![Haunted - Ross Bugden](https://www.youtube.com/watch?v=ZOrxwqvfD2E)

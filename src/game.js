@@ -14,10 +14,6 @@ var Stage_1 = new Phaser.Class({
 		this.stage.setPlayer(this.ghost);
 		this.stage.generateEvents();
 
-		game.canvas.addEventListener('mousedown', function () {
-			game.input.mouse.requestPointerLock();
-		});
-
 		this.cameras.main.setZoom(4);
 		this.cameras.main.startFollow(this.ghost.entity);
 	},
@@ -38,6 +34,7 @@ var Game_Over = new Phaser.Class({
 		let game_over = this.sound.add('gameover');
 		let pacman = this.add.image(640, 360, 'game_over_pacman');
 
+		game_over.setVolume(1.2);
 		game_over.play();
 		this.tweens.add({
 			targets: pacman,
@@ -84,8 +81,7 @@ var Game_Over = new Phaser.Class({
 
 
 				try_again.on('pointerup', () => {
-					game.scene.start('main_menu');
-					game.scene.stop('game_over');
+					document.location.reload();
 				});
 
 				this.tweens.add({
@@ -129,19 +125,27 @@ var Main_Menu = new Phaser.Class({
 		this.load.image('letsplay', 'assets/letsplay.png');
 		this.load.image('nothanks', 'assets/nothanks.png');
 		this.load.image('menu_bg', 'assets/menu_bg.png');
+		this.load.image('square', 'assets/square.png')
 
 		this.load.tilemapTiledJSON('stage_1', 'src/stages/stage_1.json');
 
 		this.load.audio('snake', 'https://dl.dropbox.com/s/g4axwvihpfedjou/snake%3F.ogg');
 		this.load.audio('gameover', 'https://dl.dropbox.com/s/pfdj9t07q9kc0qp/gameover.mp3');
 		this.load.audio('crack', 'assets/crack.mp3');
-		this.load.audio('pacman_move', 'https://dl.dropbox.com/s/sm101gcabae33gn/pacman_siren.mp3')
+		this.load.audio('pacman_move', 'https://dl.dropbox.com/s/sm101gcabae33gn/pacman_siren.mp3');
+		this.load.audio('stage_bgm', 'assets/stage_bgm.ogg');
+		this.load.audio('menu_bgm', 'assets/menu_bgm.mp3');
 
 		this.load.spritesheet('ghost', 'https://i.imgur.com/LQmi5bg.png', {frameWidth: 28, frameHeight: 28});
 	},
 
 	create: function () {
 		this.add.image(0, 0, 'menu_bg').setOrigin(0);
+		let bgm = this.sound.add('menu_bgm', {
+			loop: true
+		});
+		bgm.setVolume(0.5);
+		bgm.play();
 
 		let play = this.add.image(376, 407, 'letsplay').setOrigin(0);
 		let no_thanks = this.add.image(450, 507, 'nothanks').setOrigin(0);
@@ -160,6 +164,7 @@ var Main_Menu = new Phaser.Class({
 
 
 		play.on('pointerup', () => {
+			bgm.stop();
 			game.scene.start('stage_1');
 			game.scene.stop('main_menu');
 		});
