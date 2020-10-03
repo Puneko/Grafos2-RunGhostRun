@@ -119,7 +119,7 @@ var Main_Menu = new Phaser.Class({
 		this.load.image('pactileset', 'https://i.imgur.com/m6pk1wQ.png');
 		this.load.image('blue_bar', 'assets/blue_bar.png');
 		this.load.image('game_over_pacman', 'https://dl.dropbox.com/s/f988j3xqe5fipg7/gameover_pacman.png');
-		this.load.image('pacman_hand', 'http://dl.dropbox.com/s/05drguhfupi7ff0/pacman_reach.png');
+		this.load.image('pacman_hand', 'https://dl.dropbox.com/s/05drguhfupi7ff0/pacman_reach.png');
 		this.load.image('game_over_bg', 'assets/game_over_bg.png');
 		this.load.image('try_again', 'assets/try_again.png');
 		this.load.image('letsplay', 'assets/letsplay.png');
