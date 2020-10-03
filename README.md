@@ -22,11 +22,11 @@ Run, Ghost, Run! consiste em um jogo de plataforma inspirado no jogo Pac-Man com
 **Linguagem**: Javascript<br>
 **Framework**: Phaser<br>
 
-É necessário possuir python instalado
+É recomendado ter python instalado, embora outra ferramenta para web server local possa ser utilizada para subir o jogo localmente.
 
 
 ## Uso 
-#### Para executar localmente
+#### Para executar localmente via python
 ```python -m http.server 3000 ```
 
 O jogo será executado em localhost:3000
@@ -38,7 +38,7 @@ São utilizados os algoritmos de Dijkstra e Prim.
 Dijkstra é implementado no cáluco de melhor caminho do Pac-man até o jogador, enquanto Prim gera os labirintos infinitos.
 
 ## Créditos
-![Title Theme (8-Bit Style) - Kat](https://opengameart.org/content/title-theme-8-bit-style)
-![Chinese Stock Car Dealer - 5pr1n6](https://opengameart.org/content/chinese-stock-car-dealer)
-![Pac-Font](https://www.dafont.com/pt/pacfont.font)
-![Haunted - Ross Bugden](https://www.youtube.com/watch?v=ZOrxwqvfD2E)
+[Title Theme (8-Bit Style) - Kat](https://opengameart.org/content/title-theme-8-bit-style)
+[Chinese Stock Car Dealer - 5pr1n6](https://opengameart.org/content/chinese-stock-car-dealer)
+[Pac-Font](https://www.dafont.com/pt/pacfont.font)
+[Haunted - Ross Bugden](https://www.youtube.com/watch?v=ZOrxwqvfD2E)
