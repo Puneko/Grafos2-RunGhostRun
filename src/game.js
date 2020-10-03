@@ -62,10 +62,11 @@ var Maze_Stage = new Phaser.Class({
 		this.mazePlayer.scene.physics.world.bounds.width = (15*playerCount*16)+8;
 		this.cameras.main.setZoom(2);
 		this.cameras.main.startFollow(this.mazePlayer.entity);
+		
 	},
 
 	update: function() {
-		
+		this.stage.update();
 		this.mazePlayer.update();
 	}
 });

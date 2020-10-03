@@ -2,7 +2,7 @@ var Mazeplayer;
 class MazePlayer  {
     constructor(scene,x = 0, y= 0)
     {
-        this.entity = scene.physics.add.sprite(x, y, 'ghost').setScale(0.4);
+        this.entity = scene.physics.add.sprite(x, y, 'ghost').setScale(0.3);
 		this.entity.setCollideWorldBounds(true);
         this.entity.body.setAllowGravity(false);
         this.isAlive = true;
