@@ -52,12 +52,10 @@ var Maze_Stage = new Phaser.Class({
 		this.load.image('cherry','https://dl.dropbox.com/s/5hg725qx7w19qgs/cherry.png', {frameWidth: 12, frameHeight: 12})
 	},
 	create: function () {
-		this.stage = new Ministage(this, 'maze_stage', 'labTile',5*playerCount,15*playerCount);
-
 		this.mazePlayer = new MazePlayer(this,8,8);
+		this.stage = new Ministage(this, 'maze_stage', 'labTile',5*playerCount,15*playerCount,this.mazePlayer);
+		this.stage.setPlayer();
 		
-		this.stage.setPlayer(this.mazePlayer);
-		console.log(this.mazePlayer);
 		this.mazePlayer.scene.physics.world.bounds.height = (5*playerCount*16)+8;
 		this.mazePlayer.scene.physics.world.bounds.width = (15*playerCount*16)+8;
 		this.cameras.main.setZoom(2);
