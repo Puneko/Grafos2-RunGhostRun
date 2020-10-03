@@ -1,15 +1,17 @@
-var player;
-class Player {
-	constructor(scene, x = 0, y = 0) {
-        this.isAlive = true;
-		this.entity = scene.physics.add.sprite(x, y, 'ghost');
+var Mazeplayer;
+class MazePlayer  {
+    constructor(scene,x = 0, y= 0)
+    {
+        this.entity = scene.physics.add.sprite(x, y, 'ghost').setScale(0.3);
 		this.entity.setCollideWorldBounds(true);
-        this.entity.setGravityY(300);
+        this.entity.body.setAllowGravity(false);
+        this.isAlive = true;
+		
 		this.scene = scene;
         this.speed = 100;
         this.last_trigger;
         this.cursors = scene.input.keyboard.createCursorKeys();
-        player = this;
+        Mazeplayer = this;
         scene.anims.create({
             key: 'left',
             frames: scene.anims.generateFrameNumbers('ghost', { start: 0, end: 1 }),
@@ -27,16 +29,10 @@ class Player {
             frames: [ { key: 'ghost', frame: 0 } ],
             frameRate: 10,
         });
-	}
-
-    kill(){
-        this.isAlive = false;
-        this.entity.destroy();
     }
 
-	update() {
-        if(!this.isAlive)
-            return
+    update() {
+       
         if (this.cursors.left.isDown)
         {
             this.entity.setVelocityX(-160);
@@ -48,15 +44,20 @@ class Player {
             this.entity.setVelocityX(160);
         
             this.entity.anims.play('right', true);
+        } 
+        else if (this.cursors.up.isDown)
+        {
+            this.entity.setVelocityY(-160);
+            this.entity.anims.play('right', true);
+        }
+        else if (this.cursors.down.isDown)
+        {
+            this.entity.setVelocityY(160);
+            this.entity.anims.play('left', true);
         } else {
             this.entity.anims.play('stop', true);
             this.entity.setVelocityX(0);
-        }
-        
-        if (this.cursors.up.isDown && this.entity.body.blocked.down)
-        {
-            
-            this.entity.setVelocityY(-400);
+            this.entity.setVelocityY(0);
         }
 	}
 }

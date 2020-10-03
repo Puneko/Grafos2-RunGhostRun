@@ -1,3 +1,4 @@
+var playerCount = 1;
 var Stage_1 = new Phaser.Class({
 	Extends: Phaser.Scene,
 	initialize: function Stage_1() {
@@ -125,7 +126,9 @@ var Main_Menu = new Phaser.Class({
 		this.load.image('letsplay', 'assets/letsplay.png');
 		this.load.image('nothanks', 'assets/nothanks.png');
 		this.load.image('menu_bg', 'assets/menu_bg.png');
-		this.load.image('square', 'assets/square.png')
+		this.load.image('square', 'assets/square.png');
+		this.load.image('labTile','assets/labTile.png');
+		this.load.image('cherry','https://dl.dropbox.com/s/5hg725qx7w19qgs/cherry.png', {frameWidth: 12, frameHeight: 12});
 
 		this.load.tilemapTiledJSON('stage_1', 'src/stages/stage_1.json');
 
@@ -192,6 +195,30 @@ var Main_Menu = new Phaser.Class({
 	}
 });
 
+var Maze_Stage = new Phaser.Class({
+	Extends: Phaser.Scene,
+	initialize: function Maze_Stage() {
+		Phaser.Scene.call(this, {key: 'maze_stage'});
+	},
+
+	create: function () {
+		this.mazePlayer = new MazePlayer(this,8,8);
+		this.stage = new Ministage(this, 'maze_stage', 'labTile',5*playerCount,15*playerCount,this.mazePlayer);
+		this.stage.setPlayer();
+		
+		this.mazePlayer.scene.physics.world.bounds.height = (5*playerCount*16)+8;
+		this.mazePlayer.scene.physics.world.bounds.width = (15*playerCount*16)+8;
+		this.cameras.main.setZoom(2);
+		this.cameras.main.startFollow(this.mazePlayer.entity);
+		
+	},
+
+	update: function() {
+		this.stage.update();
+		this.mazePlayer.update();
+	}
+});
+
 var config = {
     type: Phaser.AUTO,
     width: 1280,
@@ -203,7 +230,7 @@ var config = {
     		debug: false
     	}
     },
-    scene: [Main_Menu, Stage_1, Game_Over],
+    scene: [Main_Menu, Stage_1, Maze_Stage, Game_Over],
     pixelArt: true,
     scale: {
     	mode: Phaser.Scale.FIT
