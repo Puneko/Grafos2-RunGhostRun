@@ -4,15 +4,27 @@ class Enemy {
 		this.entity.setCollideWorldBounds(true);
 		this.entity.body.setAllowGravity(false);
 
+		this.sound_rage = 500;
+		this.move_sound = scene.sound.add('pacman_move', {
+			loop: true
+		});
+		this.move_sound.play();
+
 		this.target = target.entity;
 		this.scene = scene;
 		this.speed = 100;
 		this.entity.setSize(this.entity.width/4, this.entity.height/4, true);
 		
 		scene.physics.add.collider(this.entity, this.target, () => {
-			scene.sound.add('snake').play();
 			target.kill();
 			this.target = null;
+			this.move_sound.stop();
+			this.stage_bgm.stop();
+
+			scene.events.once('postupdate', () => {
+				game.scene.start('game_over');
+				game.scene.stop(scene.scene.key);
+			});
 		});
 
 		scene.anims.create({
@@ -26,6 +38,7 @@ class Enemy {
 		this.pacman_graph;
 		this.path = [];
 		this.colliders = [];
+		this.stage_bgm;
 
 		this.entity.anims.play('pac_waka', true);
 	}
@@ -185,6 +198,11 @@ class Enemy {
 				if(this.entity.body.velocity.x || this.entity.body.velocity.y)
 					this.entity.setVelocity(0);
 				break;
+		}
+
+		if(this.target) {
+			let player_distance = getDistance(this.target.body.position, this.entity.body.position);
+			this.move_sound.setVolume(1 - (player_distance/this.sound_rage));
 		}
 
 		this.update.previous_state = state;
