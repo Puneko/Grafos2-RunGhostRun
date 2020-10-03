@@ -11,7 +11,15 @@ class Stage {
 		this.pacman_spawn_point = this.stage_info.pacman_spawn_point;
 		this.end_area = this.stage_info.end_area;
 
+		this.end_area = scene.add.image(this.end_area.start.x, this.end_area.start.y, 'square').setOrigin(0).setAlpha(0).setDisplaySize(this.end_area.end.x - this.end_area.start.x, this.end_area.end.y - this.end_area.start.y);
+		scene.physics.add.staticGroup(this.end_area);
+
 		this.wall_layer.setCollisionByExclusion([-1]);
+
+		this.stage_bgm = scene.sound.add('stage_bgm', {
+			loop: true
+		});
+		this.stage_bgm.play();
 	}
 	
 	generatePacmanNodes() {
@@ -55,6 +63,9 @@ class Stage {
 
 	setPlayer(player) {
 		this.scene.physics.add.collider(player.entity, this.wall_layer);
+		this.scene.physics.add.overlap(player.entity, this.end_area, () => {
+			document.location.reload();
+		});
 		var wasColliding;
 
 		this.node_triggers.forEach((trigger) => {
@@ -95,6 +106,7 @@ class Stage {
 
 	setPacman(pacman) {
 		this.pacman = pacman;
+		this.pacman.stage_bgm = this.stage_bgm;
 		this.generatePacmanNodes();
 
 		this.scene.physics.add.collider(pacman.entity, this.wall_layer);
@@ -105,7 +117,7 @@ class Stage {
 			this.scene.physics.add.overlap(trigger, pacman.entity, () => {
 				pacman.path.shift();
 			}, () => {
-				if(pacman.path[0].index == trigger.node_index)
+				if(pacman.path.length && pacman.path[0].index == trigger.node_index)
 					return true;
 				return false;
 			});
@@ -151,15 +163,80 @@ class Stage {
 								this.updatePacmanNodes(effect);
 								let sorted_nodes = this.pacman.getNodesByDistance();
 								let node;
+								let reachability_type;
 
 								while((node = sorted_nodes.pop())) {
-									if(this.pacman.checkNodeReachability(node)) {
+									if((reachability_type = this.pacman.checkNodeReachability(node))) {
 										this.pacman.path.unshift(node);
 										this.pacman.updatePath();
 
-										while(this.pacman.path[1] && this.pacman.checkNodeReachability(this.pacman.path[1])){
+										let reachability_aux;
+
+										while(this.pacman.path[1] && (reachability_aux = this.pacman.checkNodeReachability(this.pacman.path[1]))) {
 											this.pacman.path.shift();
+											reachability_type = reachability_aux;
 										}
+
+										let tween;
+
+										switch(reachability_type) {
+											case 2:
+												tween = this.scene.tweens.add({
+													targets: this.pacman.entity,
+													duration: 1000 * getDistance({x: this.pacman.path[0].position.x, y: this.pacman.entity.y}, {x: this.pacman.entity.x, y: this.pacman.entity.y})/this.pacman.speed,
+													x: this.pacman.path[0].position.x,
+													y: this.pacman.entity.y
+												});
+
+												tween.on('start', () => {
+													if(!this.pacman.back_update)
+														this.pacman.back_update = this.pacman.update;
+													this.pacman.update = () => { return; }
+
+													if(this.pacman.entity.x > this.pacman.path[0].position.x)
+														this.pacman.entity.rotation = Math.PI;
+													else
+														this.pacman.entity.rotation = 0;
+												});
+
+												tween.on('update', () => {
+													if(this.pacman.getState() == 1)
+														tween.complete();
+												});
+
+												tween.on('complete', () => {
+													this.pacman.update = this.pacman.back_update;
+												});
+												break;
+											case 3:
+												tween = this.scene.tweens.add({
+													targets: this.pacman.entity,
+													duration: 1000 * getDistance({x: this.pacman.entity.x, y: this.pacman.path[0].position.y}, {x: this.pacman.entity.x, y: this.pacman.entity.y})/this.pacman.speed,
+													x: this.pacman.entity.x,
+													y: this.pacman.path[0].position.y
+												});
+
+												tween.on('start', () => {
+													if(!this.pacman.back_update)
+														this.pacman.back_update = this.pacman.update;
+													this.pacman.update = () => { return; }
+													if(this.pacman.entity.y > this.pacman.path[0].position.y)
+														this.pacman.entity.rotation = -Math.PI/2;
+													else
+														this.pacman.entity.rotation = Math.PI/2;
+												});
+
+												tween.on('update', () => {
+													if(this.pacman.getState() == 1)
+														tween.complete();
+												});
+
+												tween.on('complete', () => {
+													this.pacman.update = this.pacman.back_update;
+												});
+												break;
+										}
+
 										break;
 									}
 								}

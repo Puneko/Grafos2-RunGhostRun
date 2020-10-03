@@ -4,15 +4,27 @@ class Enemy {
 		this.entity.setCollideWorldBounds(true);
 		this.entity.body.setAllowGravity(false);
 
+		this.sound_rage = 500;
+		this.move_sound = scene.sound.add('pacman_move', {
+			loop: true
+		});
+		this.move_sound.play();
+
 		this.target = target.entity;
 		this.scene = scene;
 		this.speed = 100;
 		this.entity.setSize(this.entity.width/4, this.entity.height/4, true);
 		
 		scene.physics.add.collider(this.entity, this.target, () => {
-			scene.sound.add('snake').play();
 			target.kill();
 			this.target = null;
+			this.move_sound.stop();
+			this.stage_bgm.stop();
+
+			scene.events.once('postupdate', () => {
+				game.scene.start('game_over');
+				game.scene.stop(scene.scene.key);
+			});
 		});
 
 		scene.anims.create({
@@ -26,6 +38,7 @@ class Enemy {
 		this.pacman_graph;
 		this.path = [];
 		this.colliders = [];
+		this.stage_bgm;
 
 		this.entity.anims.play('pac_waka', true);
 	}
@@ -76,13 +89,13 @@ class Enemy {
 
 	checkNodeReachability(node) {
 		if(!raycast(this.entity.x, this.entity.y, node.position.x, node.position.y, this.colliders))
-			return true;
+			return 1;
 
 		if(!(raycast(this.entity.x, this.entity.y, node.position.x, this.entity.y, this.colliders) || raycast(node.position.x, this.entity.y, node.position.x, node.position.y, this.colliders)))
-			return true;
+			return 2;
 
 		if(!(raycast(this.entity.x, this.entity.y, this.entity.x, node.position.y, this.colliders) || raycast(this.entity.x, node.position.y, node.position.x, node.position.y, this.colliders)))
-			return true;
+			return 3;
 
 		return false;
 	}
@@ -94,15 +107,81 @@ class Enemy {
 				if(this.update.previous_state != 2) {
 					let sorted_nodes = this.getNodesByDistance();
 					let node;
+					let reachability_type;
 								
 					while((node = sorted_nodes.pop())) {
-						if(this.checkNodeReachability(node)) {
+						if((reachability_type = this.checkNodeReachability(node))) {
 							this.path.unshift(node);
 							this.updatePath();
 
-							while(this.path[1] && this.checkNodeReachability(this.path[1])){
+							let reachability_aux;
+
+							while(this.path[1] && (reachability_aux = this.checkNodeReachability(this.path[1]))) {
 								this.path.shift();
+								reachability_type = reachability_aux;
 							}
+
+							let tween;
+
+							switch(reachability_type) {
+								case 2:
+									tween = this.scene.tweens.add({
+										targets: this.entity,
+										duration: 1000 * getDistance({x: this.path[0].position.x, y: this.entity.y}, {x: this.entity.x, y: this.entity.y})/this.speed,
+										x: this.path[0].position.x,
+										y: this.entity.y
+									});
+
+									tween.on('start', () => {
+										if(!this.back_update)
+											this.back_update = this.update;
+										this.update = function() { return; }
+
+										if(this.entity.x > this.path[0].position.x)
+											this.entity.rotation = Math.PI;
+										else
+											this.entity.rotation = 0;
+									});
+
+									tween.on('update', () => {
+										if(this.getState() == 1)
+											tween.complete();
+									});
+
+									tween.on('complete', () => {
+										this.update = this.back_update;
+									});
+									break;
+								case 3:
+									tween = this.scene.tweens.add({
+										targets: this.entity,
+										duration: 1000 * getDistance({x: this.entity.x, y: this.path[0].position.y}, {x: this.entity.x, y: this.entity.y})/this.speed,
+										x: this.entity.x,
+										y: this.path[0].position.y
+									});
+
+									tween.on('start', () => {
+										if(!this.back_update)
+											this.back_update = this.update;
+										this.update = function() { return; }
+
+										if(this.entity.y > this.path[0].position.y)
+											this.entity.rotation = -Math.PI/2;
+										else
+											this.entity.rotation = Math.PI/2;
+									});
+
+									tween.on('update', () => {
+										if(this.getState() == 1)
+											tween.complete();
+									});
+
+									tween.on('complete', () => {
+										this.update = this.back_update;
+									});
+									break;
+							}
+
 							break;
 						}
 					}
@@ -119,6 +198,11 @@ class Enemy {
 				if(this.entity.body.velocity.x || this.entity.body.velocity.y)
 					this.entity.setVelocity(0);
 				break;
+		}
+
+		if(this.target) {
+			let player_distance = getDistance(this.target.body.position, this.entity.body.position);
+			this.move_sound.setVolume(1 - (player_distance/this.sound_rage));
 		}
 
 		this.update.previous_state = state;
