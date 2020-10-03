@@ -33,23 +33,25 @@ class Ministage {
         this.scene.physics.add.collider(this.player.entity, this.cherry, ()=>{
             playerCount += 0.5;
             this.scene.events.once('postupdate', () => {
-                this.scene.scene.restart('maze_stage');
+            this.scene.scene.restart('maze_stage');
                 //game.scene.stop('maze_stage');
-            });
-            
-            
+            })
         });
+
     }
     timeout(){
         this.vibeChecker = this.scene.physics.add.sprite(8,8,'pacman').setScale(0.4);
         this.scene.physics.add.collider(this.vibeChecker, this.player);
         this.vibeChecker.body.setAllowGravity(false);
         this.vibeChecker.anims.play('pac_waka', true);
-        console.log("Bruh",this.vibeChecker)
+        this.scene.physics.add.collider(this.vibeChecker, this.player.entity, () => {
+			game.sound.stopAll()
+			this.scene.events.once('postupdate', () => {
+				game.scene.start('game_over');
+				game.scene.stop(this.scene.scene.key);
+			});
+		});
         
-
-
-        console.log("Time's up");
     }
     update(){
         if(this.vibeChecker){

@@ -64,7 +64,12 @@ class Stage {
 	setPlayer(player) {
 		this.scene.physics.add.collider(player.entity, this.wall_layer);
 		this.scene.physics.add.overlap(player.entity, this.end_area, () => {
-			document.location.reload();
+			this.scene.events.once('postupdate', () => {
+				game.scene.start('maze_stage');
+				game.scene.stop(this.scene.scene.key);
+				this.pacman.move_sound.stop();
+			});
+			
 		});
 		var wasColliding;
 
