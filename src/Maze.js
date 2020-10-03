@@ -15,7 +15,7 @@ class Maze {
               this.grid[i][j] = _WALL;
           }
         
-        let cell = {x:0, y:15};
+        let cell = {x:0, y:0};
        
         
         this.grid[cell.x][cell.y] = _PATH;
